@@ -1,0 +1,41 @@
+version: "3.9"
+
+services:
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: chromadb
+    ports:
+      - "8000:8000"
+    volumes:
+      - chroma-data:/chroma/chroma
+
+  flask-app:
+    build: ./flask-app
+    container_name: flask-app
+    ports:
+      - "5000:5000"
+
+  agent:
+    build: ./agent
+    container_name: agent
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - ollama
+      - chromadb
+      - flask-app
+    stdin_open: true
+    tty: true
+
+volumes:
+  ollama-data:
+  chroma-data:
